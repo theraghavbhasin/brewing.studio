@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1S9VW3ZDS6"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-1S9VW3ZDS6');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<noscript><style>.reveal{opacity:1;transform:none}</style></noscript>
+<title>Brewing Studio — Directed Velocity for Teams That Ship</title>
+<meta name="description" content="Strategy, positioning, identity, web systems, and AI deployments for startups, enterprises, and institutions — led personally, start to finish, by Brewing Studio.">
+<link rel="canonical" href="https://brewing.studio/">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#168aad">
+
+<meta property="og:title" content="Brewing Studio — Directed Velocity for Teams That Ship">
+<meta property="og:description" content="Strategy, positioning, identity, web systems, and AI deployments for startups, enterprises, and institutions — led personally, start to finish, by Brewing Studio.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://brewing.studio/">
+<meta property="og:site_name" content="Brewing Studio">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://brewing.studio/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Brewing Studio — Directed velocity for teams that ship.">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Brewing Studio — Directed Velocity for Teams That Ship">
+<meta name="twitter:description" content="Strategy, positioning, identity, web systems, and AI deployments for startups, enterprises, and institutions — led personally, start to finish, by Brewing Studio.">
+<meta name="twitter:image" content="https://brewing.studio/og-image.png">
+<meta name="twitter:image:alt" content="Brewing Studio — Directed velocity for teams that ship.">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%23333333%22/><circle cx=%2250%22 cy=%2250%22 r=%2222%22 fill=%22%23168aad%22/></svg>">
+
+<link rel="preconnect" href="https://assets.calendly.com">
+<link rel="stylesheet" href="https://assets.calendly.com/assets/external/widget.css">
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="icon-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#34a0a4"/>
+      <stop offset="0.55" stop-color="#168aad"/>
+      <stop offset="1" stop-color="#e94e80"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="cursor-reticle" aria-hidden="true">
+  <div class="reticle-ring"></div>
+  <div class="reticle-dot"></div>
+</div>
+
+<canvas id="brew-canvas" aria-hidden="true"></canvas>
+<div class="grid-overlay" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="scroll-progress" aria-hidden="true"><span id="scroll-progress-bar"></span></div>
+
+<div class="constellation-hits" id="constellation-hits">
+  <div class="constellation-hit" data-index="0" style="left:16%; top:15%;"></div>
+  <div class="constellation-hit" data-index="1" style="left:84%; top:25%;"></div>
+  <div class="constellation-hit" data-index="2" style="left:15%; top:78%;"></div>
+</div>
+<div class="constellation-label" id="constellation-label">
+  <p class="constellation-title"></p>
+  <p class="constellation-desc"></p>
+</div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="#top" class="logo">
+      <img src="logo.png" alt="Brewing Studio" class="logo-img">
+    </a>
+    <div class="nav-actions">
+      <button id="theme-toggle" class="theme-toggle tooltip-below" aria-label="Toggle light and dark theme" data-tooltip="Switch to light mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+      </button>
+      <button class="btn btn-primary btn-small magnetic" data-calendly-trigger>
+        Schedule a Call
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="hero-inner">
+      <p class="pill reveal">
+        <span class="pill-dot"></span> 50+ clients, 5+ countries, 7+ years
+      </p>
+
+      <h1 class="hero-title reveal">
+        <span class="gradient-text" data-text="Directed velocity">Directed velocity</span> for teams that ship.
+      </h1>
+
+      <p class="hero-sub reveal">
+        Strategy, positioning, identity, web systems, and AI deployments for startups, enterprises, and institutions — led personally, start to finish.
+      </p>
+
+      <div class="hero-actions reveal">
+        <button class="btn btn-primary magnetic" data-calendly-trigger>
+          Schedule a Call
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <a href="#notify" class="btn btn-ghost magnetic">Get in Touch</a>
+      </div>
+    </div>
+
+  </section>
+
+  <section class="clients">
+    <div class="section-inner">
+      <p class="eyebrow center reveal">In Good Company</p>
+      <p class="clients-stats reveal">Across tech, fintech, education, non-profit, healthcare, publishing, and more.</p>
+      <div class="clients-logos reveal">
+        <img class="logo-sm" src="clients/elsevier.png" alt="Elsevier" loading="lazy">
+        <img class="logo-reduce" src="clients/safdarjung-hospital.png" alt="Safdarjung Hospital" loading="lazy">
+        <img class="logo-boost" src="clients/iit-kanpur-aa.png" alt="IIT Kanpur Alumni Association" loading="lazy">
+        <img src="clients/sensorise.png" alt="Sensorise" loading="lazy">
+        <img class="logo-boost" src="clients/boon.png" alt="Boon" loading="lazy">
+        <img class="logo-reduce-sm" src="clients/thinksys.png" alt="ThinkSys" loading="lazy">
+        <img src="clients/fintech-festival-india.png" alt="FinTech Festival India" loading="lazy">
+        <img class="logo-reduce-sm" src="clients/iforest.png" alt="iFOREST" loading="lazy">
+      </div>
+    </div>
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>Sensorise</span>
+        <span>ThinkSys</span>
+        <span>IIT Kanpur Alumni Association</span>
+        <span>iFOREST Global</span>
+        <span>Safdarjung Hospital</span>
+        <span>DPS Siliguri</span>
+        <span>Ataraxia</span>
+        <span>Boon</span>
+        <span>Constellar</span>
+        <span>FinTech Festival India</span>
+        <span>Elsevier</span>
+        <span>Saaras Impact Foundation</span>
+        <span>Aakriti Art Creations</span>
+        <span>Svadia</span>
+        <span>Prenita Dutt</span>
+        <span>HRMates</span>
+        <span>Mashmari</span>
+        <span>Tailormade Journeys</span>
+        <span>DIG</span>
+        <span>Amas</span>
+        <span>FilmsPositive</span>
+        <span>ASTL</span>
+        <span>Prime Diagnostics</span>
+        <span>GClocked</span>
+        <span>The Beehive</span>
+        <span>Seams</span>
+        <span>Khwaab</span>
+        <span>Skill4Sure</span>
+        <span>7th Avenue</span>
+        <span>Imbue Education</span>
+        <span>Sensorise</span>
+        <span>ThinkSys</span>
+        <span>IIT Kanpur Alumni Association</span>
+        <span>iFOREST Global</span>
+        <span>Safdarjung Hospital</span>
+        <span>DPS Siliguri</span>
+        <span>Ataraxia</span>
+        <span>Boon</span>
+        <span>Constellar</span>
+        <span>FinTech Festival India</span>
+        <span>Elsevier</span>
+        <span>Saaras Impact Foundation</span>
+        <span>Aakriti Art Creations</span>
+        <span>Svadia</span>
+        <span>Prenita Dutt</span>
+        <span>HRMates</span>
+        <span>Mashmari</span>
+        <span>Tailormade Journeys</span>
+        <span>DIG</span>
+        <span>Amas</span>
+        <span>FilmsPositive</span>
+        <span>ASTL</span>
+        <span>Prime Diagnostics</span>
+        <span>GClocked</span>
+        <span>The Beehive</span>
+        <span>Seams</span>
+        <span>Khwaab</span>
+        <span>Skill4Sure</span>
+        <span>7th Avenue</span>
+        <span>Imbue Education</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="expertise" id="expertise">
+    <div class="section-inner">
+      <p class="eyebrow center reveal">Where most engagements start</p>
+
+      <div class="ladder reveal">
+        <div class="ladder-step">
+          <p class="ladder-tag">Step 1 &middot; Start here</p>
+          <div class="ladder-step-body">
+            <div>
+              <h3 class="ladder-step-title">Brand Clarity Audit</h3>
+              <p class="ladder-step-desc">A fast, outside read on your positioning — what's working, what's costing you deals, and where to fix it first.</p>
+            </div>
+            <div class="ladder-step-cta">
+              <span class="ladder-step-price">$2,000 &middot; 2 weeks</span>
+              <button class="card-cta" data-calendly-trigger>Ask about this &rarr;</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ladder-connector" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 4v14M12 18l-5-5M12 18l5-5"/></svg>
+          <span>If it points to something bigger</span>
+        </div>
+
+        <div class="flagship-card">
+          <p class="flagship-eyebrow">Flagship</p>
+          <h2 class="flagship-title">Brand Clarity Sprint</h2>
+          <p class="flagship-desc">Four weeks. At the end: a positioning system, identity, and message you can defend in a boardroom — not a moodboard you have to translate yourself.</p>
+
+          <ul class="flagship-includes">
+            <li><strong>Direct access.</strong> Led personally by the studio's founder — no handoffs to a rotating account team.</li>
+            <li><strong>A working system, not a deck.</strong> Positioning, identity, and message delivered as documentation your team can actually run.</li>
+            <li><strong>No guesswork after.</strong> A clear handoff, so you're not calling us for every follow-up decision.</li>
+          </ul>
+
+          <div class="flagship-meta">
+            <span class="flagship-price">From $15,000</span>
+            <button class="btn btn-primary magnetic" data-calendly-trigger>
+              See If It's a Fit
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+          <p class="flagship-subline">A short call first — no pitch, just an honest read on whether a Sprint is the right next step.</p>
+        </div>
+      </div>
+
+      <p class="eyebrow center reveal solutions-divider">Or, if you need something specific</p>
+
+      <div class="card-grid card-grid-pair">
+        <article class="tilt-card featured-card reveal">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 8h18"/><path d="M9 12.2 7 14.2 9 16.2" stroke="url(#icon-grad)" stroke-width="1.8"/><path d="M15 12.2 17 14.2 15 16.2" stroke="url(#icon-grad)" stroke-width="1.8"/></svg>
+          </div>
+          <h3>Web Systems</h3>
+          <p>Sites your team can actually run — with a technical fallback for when it breaks.</p>
+          <div class="card-tiers">
+            <div class="card-tier">
+              <div>
+                <p class="card-tier-name">New Build</p>
+                <p class="card-tier-desc">A site your team can update themselves, without calling us for every text change.</p>
+              </div>
+              <span class="card-tier-price">$3,000</span>
+            </div>
+            <div class="card-tier">
+              <div>
+                <p class="card-tier-name">Governance Retainer</p>
+                <p class="card-tier-desc">Ongoing technical cover for the WordPress and plugin sprawl that piles up after launch.</p>
+              </div>
+              <span class="card-tier-price">$500/mo</span>
+            </div>
+          </div>
+          <button class="card-cta" data-calendly-trigger>Ask about this &rarr;</button>
+        </article>
+
+        <article class="tilt-card featured-card reveal">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.3a1.7 1.7 0 0 0 0 3.4V15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.3a1.7 1.7 0 0 0 0-3.4Z"/><path d="M14 7.5v9" stroke-dasharray="2 2.3"/><circle cx="14" cy="12" r="1.2" fill="url(#icon-grad)" stroke="none"/></svg>
+          </div>
+          <h3>Events &amp; Print</h3>
+          <p>Design, print, and on-the-ground execution — for launches, conferences, and everything in between.</p>
+          <div class="card-tiers">
+            <div class="card-tier">
+              <div>
+                <p class="card-tier-name">Collateral Only</p>
+                <p class="card-tier-desc">Posters, standees, and print-ready assets for an event you're already running.</p>
+              </div>
+              <span class="card-tier-price">$2,000</span>
+            </div>
+            <div class="card-tier">
+              <div>
+                <p class="card-tier-name">Full Production</p>
+                <p class="card-tier-desc">Design through on-the-ground execution, managed start to finish — based in India, available globally.</p>
+              </div>
+              <span class="card-tier-price">Quoted</span>
+            </div>
+          </div>
+          <button class="card-cta" data-calendly-trigger>Ask about this &rarr;</button>
+        </article>
+      </div>
+
+      <p class="expertise-more reveal">AI deployments are the newest line — scoped per engagement, best discussed on a call.</p>
+    </div>
+  </section>
+
+
+  <section class="founder" id="founder">
+    <div class="section-inner founder-inner">
+      <div class="founder-avatar reveal"><img src="raghav.jpg" alt="Raghav Bhasin, founder of Brewing Studio" loading="lazy"></div>
+      <div class="founder-copy">
+        <p class="eyebrow reveal">Who's Behind This</p>
+        <h2 class="section-title reveal">Founder-Led Operation</h2>
+        <p class="founder-bio reveal">Brewing Studio is run by Raghav Bhasin — the person who scopes the work, thinks through the strategy, and stays on through delivery. What used to take a full agency team is now handled by a senior operator working with AI tools and a small trusted network of specialists, brought in project by project. You will be working with and talking to the person doing the thinking, and not an account manager relaying it.</p>
+        <a class="founder-link reveal" href="https://www.linkedin.com/in/theraghavbhasin/" target="_blank" rel="noopener">
+          Connect on LinkedIn
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="notify" id="notify">
+    <div class="section-inner notify-inner">
+      <div class="notify-copy reveal">
+        <h2 class="section-title">Let's build!</h2>
+        <p>Excited to hear what you're working on — let's connect.</p>
+      </div>
+
+      <form class="notify-form reveal" id="notify-form" action="https://formspree.io/f/xyegzjww" method="POST">
+        <label for="email" class="sr-only">Email address</label>
+        <input type="email" id="email" name="email" placeholder="you@company.com" required autocomplete="email">
+        <label for="message" class="sr-only">What are you working on? (optional)</label>
+        <textarea id="message" name="message" placeholder="A line or two about what you need (optional)" rows="2"></textarea>
+        <input type="text" name="_gotcha" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button type="submit" class="btn btn-primary magnetic">
+          <span class="btn-label">Get in Touch</span>
+        </button>
+      </form>
+      <p class="notify-note reveal">
+        Or skip the wait — <button class="link-inline" data-calendly-trigger>schedule a call instead</button>.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="section-inner footer-inner">
+    <a href="#top" class="logo">
+      <img src="logo.png" alt="Brewing Studio" class="logo-img">
+    </a>
+
+    <div class="footer-socials">
+      <a href="https://instagram.com/brewingstudio" target="_blank" rel="noopener noreferrer" aria-label="Instagram" data-tooltip="Instagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <a href="https://linkedin.com/company/brewingstudio" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" data-tooltip="LinkedIn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.94 8.5H3.56V20h3.38V8.5ZM5.25 3.5a1.97 1.97 0 1 0 0 3.94 1.97 1.97 0 0 0 0-3.94ZM20.44 20h-3.37v-5.6c0-1.34-.02-3.06-1.87-3.06-1.87 0-2.16 1.46-2.16 2.96V20H9.67V8.5h3.24v1.57h.05c.45-.85 1.56-1.75 3.2-1.75 3.42 0 4.05 2.25 4.05 5.18V20Z"/></svg>
+      </a>
+      <a href="https://twitter.com/brewingstudio" target="_blank" rel="noopener noreferrer" aria-label="X / Twitter" data-tooltip="X (Twitter)">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231ZM17.083 19.77h1.833L7.084 4.126H5.117Z"/></svg>
+      </a>
+      <a href="mailto:hello@brewing.studio" aria-label="Email" data-tooltip="Email us">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+      </a>
+    </div>
+  </div>
+  <p class="footer-legal">© <span id="year"></span> Brewing Studio LLP &middot; <a href="privacy.html" class="footer-legal-link">Privacy</a> &middot; <a href="legal.html" class="footer-legal-link">Legal</a> &middot; <a href="media-kit.html" class="footer-legal-link">Media Kit</a></p>
+</footer>
+
+<script src="https://assets.calendly.com/assets/external/widget.js" defer></script>
+<script src="script.js" defer></script>
+</body>
+</html>

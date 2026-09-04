@@ -1,0 +1,1052 @@
+/* ---------- Design tokens ---------- */
+/* Brand palette pulled from brewing.studio/media-kit: teal → Blue Munsell →
+   magenta, "Jet" for ink. White is the default surface; dark is the opt-in
+   toggle state, using the navy from the studio's own live site. */
+:root {
+  --bg: #ffffff;
+  --bg-elevated: rgba(51, 51, 51, 0.035);
+  --bg-elevated-strong: rgba(51, 51, 51, 0.06);
+  --border: rgba(51, 51, 51, 0.12);
+  --text: #333333;
+  --text-muted: #667079;
+  --text-faint: #9aa1a8;
+
+  --teal: #34a0a4;
+  --teal-text: #1f7a86; /* text-safe teal, ~5:1 on white — use for TEXT only, keep --teal for fills/borders/glows */
+  --azure: #168aad;
+  --magenta: #e94e80;
+
+  --gradient: linear-gradient(120deg, var(--teal), var(--azure) 55%, var(--magenta));
+  --btn-ink: #1a1a1a;
+
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0d1b2a;
+  --bg-elevated: rgba(255, 255, 255, 0.04);
+  --bg-elevated-strong: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.1);
+  --text: #edf9fd;
+  --text-muted: #9db3bf;
+  --text-faint: #5c7480;
+  --teal-text: #34a0a4;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1b2a;
+    --bg-elevated: rgba(255, 255, 255, 0.04);
+    --bg-elevated-strong: rgba(255, 255, 255, 0.07);
+    --border: rgba(255, 255, 255, 0.1);
+    --text: #edf9fd;
+    --text-muted: #9db3bf;
+    --text-faint: #5c7480;
+    --teal-text: #34a0a4;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background 0.5s var(--ease), color 0.5s var(--ease);
+}
+
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+.section-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---------- Backdrop canvas + grain ---------- */
+#brew-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    linear-gradient(to right, rgba(52, 160, 164, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(52, 160, 164, 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, black 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, black 0%, transparent 75%);
+}
+
+/* ---------- Scroll progress ---------- */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 2px;
+  z-index: 50;
+  pointer-events: none;
+  background: transparent;
+}
+.scroll-progress span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--gradient);
+  transform: scaleX(0);
+  transform-origin: left;
+  will-change: transform;
+}
+
+/* ---------- Custom cursor: HUD reticle ---------- */
+/* Two independently-translated elements (dot follows tightly, ring lags
+   behind) — plain `translate`, no SVG filter, so it stays cheap even while
+   the constellation canvas is animating underneath. Ported from
+   theraghavbhasin.com, recolored to Brewing's teal/azure/magenta tokens. */
+.cursor-reticle {
+  position: fixed;
+  inset: 0;
+  z-index: 61;
+  pointer-events: none;
+}
+.reticle-dot {
+  position: absolute;
+  top: 0; left: 0;
+  width: 6px; height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 8px var(--teal);
+  will-change: translate;
+}
+.reticle-ring {
+  position: absolute;
+  top: 0; left: 0;
+  width: 34px; height: 34px;
+  margin: -17px 0 0 -17px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--azure);
+  will-change: translate;
+  animation: reticle-spin 5s linear infinite;
+  transition: width 0.25s var(--ease), height 0.25s var(--ease), margin 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+@keyframes reticle-spin { to { transform: rotate(360deg); } }
+
+.cursor-reticle.active .reticle-ring {
+  width: 48px; height: 48px;
+  margin: -24px 0 0 -24px;
+  border-style: solid;
+  border-color: var(--magenta);
+}
+.cursor-reticle.active .reticle-dot {
+  background: var(--magenta);
+  box-shadow: 0 0 10px var(--magenta);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .cursor-reticle { display: none; }
+}
+
+/* ---------- Nav ---------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  background: color-mix(in srgb, var(--bg) 65%, transparent);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+.logo-img {
+  height: 22px;
+  width: auto;
+  display: block;
+  /* The source file is dark ink on transparent — invert it to read as
+     light-on-navy once the dark theme flips the surrounding background. */
+  transition: filter 0.4s var(--ease);
+}
+:root[data-theme="dark"] .logo-img { filter: invert(1) brightness(1.15); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .logo-img { filter: invert(1) brightness(1.15); }
+}
+
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+
+.theme-toggle {
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text);
+  cursor: pointer;
+  position: relative;
+}
+.theme-toggle svg { width: 17px; height: 17px; position: absolute; transition: transform 0.4s var(--ease), opacity 0.4s var(--ease); }
+/* Default (light theme): moon shows, meaning "click for dark". */
+.theme-toggle .icon-sun { opacity: 0; transform: rotate(60deg) scale(0.6); }
+.theme-toggle .icon-moon { opacity: 1; transform: rotate(0) scale(1); }
+/* Dark theme: sun shows, meaning "click for light". */
+:root[data-theme="dark"] .theme-toggle .icon-sun { opacity: 1; transform: rotate(0) scale(1); }
+:root[data-theme="dark"] .theme-toggle .icon-moon { opacity: 0; transform: rotate(-60deg) scale(0.6); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .icon-sun { opacity: 1; transform: rotate(0) scale(1); }
+  :root:not([data-theme="light"]) .theme-toggle .icon-moon { opacity: 0; transform: rotate(-60deg) scale(0.6); }
+}
+
+/* ---------- Constellations ---------- */
+/* Invisible hit-areas positioned over each hand-placed constellation (drawn
+   on the canvas). DOM handles hover/tap detection + the label card; the
+   canvas only reads the resulting index to brighten the matching cluster.
+   Ported from theraghavbhasin.com: 3 clusters (not 4 — Cassiopeia dropped,
+   the other three re-titled to Brewing's actual offerings), hidden below
+   ~1050px, and — since this page scrolls (the personal site doesn't) —
+   also hidden past the hero fold via a scroll listener in script.js so the
+   fixed-position hit-areas don't sit on top of the Solutions/notify
+   sections lower down the page. */
+.constellation-hits {
+  display: none;
+}
+.constellation-hit {
+  position: fixed;
+  z-index: 3;
+  width: 500px;
+  height: 460px;
+  translate: -50% -50%;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.constellation-label {
+  position: fixed;
+  z-index: 45;
+  max-width: 230px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated-strong);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 16px 40px -16px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  translate: -50% 12px;
+  scale: 0.96;
+  pointer-events: none;
+  transition: opacity 0.25s var(--ease), translate 0.25s var(--ease), scale 0.25s var(--ease);
+}
+.constellation-label.visible {
+  opacity: 1;
+  translate: -50% 0;
+  scale: 1;
+}
+.constellation-title {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.constellation-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+@media (min-width: 1050px) {
+  .constellation-hits { display: block; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .constellation-hits { display: none; }
+}
+
+/* ---------- Custom tooltips ---------- */
+/* Inverted solid pill — high-contrast against either theme, plain sans-serif,
+   no caret and no leading glyph, just a small label with a hairline gradient
+   accent underneath. */
+[data-tooltip] { position: relative; }
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 11px);
+  left: 50%;
+  translate: -50% 4px;
+  padding: 6px 10px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  color: var(--bg);
+  background:
+    linear-gradient(90deg, var(--teal), var(--azure), var(--magenta)) bottom / 100% 2px no-repeat,
+    var(--text);
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  scale: 0.96;
+  pointer-events: none;
+  transition: opacity 0.18s var(--ease), translate 0.18s var(--ease), scale 0.18s var(--ease);
+  z-index: 70;
+}
+[data-tooltip]:hover::after, [data-tooltip]:focus-visible::after {
+  opacity: 1;
+  translate: -50% 0;
+  scale: 1;
+}
+
+/* For elements too close to the top of the viewport for an upward tooltip */
+[data-tooltip].tooltip-below::after {
+  bottom: auto;
+  top: calc(100% + 11px);
+  translate: -50% -4px;
+  padding: 8px 10px 6px;
+  background:
+    linear-gradient(90deg, var(--teal), var(--azure), var(--magenta)) top / 100% 2px no-repeat,
+    var(--text);
+}
+[data-tooltip].tooltip-below:hover::after, [data-tooltip].tooltip-below:focus-visible::after {
+  translate: -50% 0;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 26px;
+  border-radius: 100px;
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), background 0.35s var(--ease), border-color 0.35s var(--ease);
+}
+.btn svg { width: 16px; height: 16px; }
+.btn-small { padding: 9px 18px; font-size: 13px; }
+
+/* Back to the original tri-color gradient fill — flat solid and the
+   2-stop gradient variants tried in between both read as worse than this.
+   Only real addition versus the very first version: explicit dark-mode
+   shadow tuning, so the glow is deliberately set for both themes instead
+   of one static value left over from light mode. */
+.btn-primary {
+  background: var(--gradient);
+  color: var(--btn-ink);
+  box-shadow: 0 8px 30px -8px rgba(22, 138, 173, 0.55);
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px -6px rgba(22, 138, 173, 0.7);
+}
+:root[data-theme="dark"] .btn-primary { box-shadow: 0 10px 32px -6px rgba(22, 138, 173, 0.62); }
+:root[data-theme="dark"] .btn-primary:hover { box-shadow: 0 15px 40px -5px rgba(22, 138, 173, 0.78); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .btn-primary { box-shadow: 0 10px 32px -6px rgba(22, 138, 173, 0.62); }
+  :root:not([data-theme="light"]) .btn-primary:hover { box-shadow: 0 15px 40px -5px rgba(22, 138, 173, 0.78); }
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text);
+}
+.btn-ghost:hover { background: var(--bg-elevated); border-color: var(--teal); }
+
+.link-inline {
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: var(--teal-text); text-decoration: underline; font: inherit;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative;
+  z-index: 2;
+  min-height: 66vh;
+  display: flex;
+  align-items: center;
+  padding: 60px 24px 24px;
+}
+.hero-inner { max-width: 860px; margin: 0 auto; text-align: center; position: relative; z-index: 4; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px 7px 10px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+.pill-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 8px var(--teal);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 1; transform: scale(1);} 50% { opacity: 0.4; transform: scale(0.75);} }
+
+.hero-title {
+  font-size: clamp(40px, 7vw, 76px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  margin: 0 0 24px;
+}
+.gradient-text {
+  background: var(--gradient);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shift 6s ease-in-out infinite;
+}
+@keyframes shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.hero-sub {
+  font-size: clamp(16px, 2vw, 19px);
+  line-height: 1.6;
+  color: var(--text-muted);
+  max-width: 620px;
+  margin: 0 auto 40px;
+}
+
+.hero-actions { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+/* ---------- Reveal on scroll ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.reveal.in-view { opacity: 1; transform: translateY(0); }
+
+/* ---------- Expertise ---------- */
+.expertise { position: relative; z-index: 2; padding: 40px 0 120px; }
+
+.eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--teal-text);
+  margin: 0 0 12px;
+}
+.eyebrow.center { text-align: center; }
+.clients .eyebrow.center { margin-bottom: 14px; }
+
+.clients-stats {
+  text-align: center;
+  font-size: 15.5px;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto 30px;
+  line-height: 1.55;
+}
+
+/* ---------- Client logos (highlight strip) ---------- */
+/* Ported from theraghavbhasin.com's client-logo treatment: flattened to
+   solid ink, low opacity, brightens on hover, inverted in dark mode. Only
+   3 logos here (not a 3x3 grid), so a centered flex row rather than a
+   fixed-column grid. Per-logo height overrides carried over verbatim from
+   the personal site for these same three files — Elsevier's condensed
+   serif needs shrinking, IIT Kanpur's mark reads small at the shared
+   height so it's boosted, Safdarjung nudged down slightly to match. */
+.clients-logos {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: center;
+  justify-items: center;
+  max-width: 760px;
+  margin: 0 auto 40px;
+  row-gap: 26px;
+  column-gap: 40px;
+}
+@media (max-width: 700px) {
+  .clients-logos { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 480px) {
+  .clients-logos { grid-template-columns: repeat(2, 1fr); }
+}
+.clients-logos img {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0);
+  opacity: 0.45;
+  transition: opacity 0.3s var(--ease);
+}
+.clients-logos img:hover { opacity: 0.85; }
+:root[data-theme="dark"] .clients-logos img { filter: brightness(0) invert(1); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .clients-logos img { filter: brightness(0) invert(1); }
+}
+/* Same per-logo optical-sizing overrides as theraghavbhasin.com for these
+   same source files: Elsevier's condensed serif is wide enough at the
+   shared height to dominate, so it's sized down; ThinkSys/iFOREST trimmed
+   slightly for the same reason; Boon and IIT Kanpur read visually smaller
+   than their neighbors, so they're boosted instead. */
+.clients-logos img.logo-sm { height: 18px; }
+.clients-logos img.logo-boost { height: 28px; }
+.clients-logos img.logo-reduce { height: 21px; }
+.clients-logos img.logo-reduce-sm { height: 17px; }
+
+.section-title {
+  font-size: clamp(28px, 4vw, 42px);
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  margin: 0 0 48px;
+}
+
+/* ---------- Flagship (Brand Clarity Sprint) ---------- */
+/* The actual revenue driver, so it leads the section rather than sitting
+   inside the 3-card menu at the same visual weight as a $2,000 entry point.
+   A top accent bar (not a full gradient border) keeps it readable in both
+   themes without fighting the card's own background. */
+.ladder { max-width: 880px; margin: 0 auto 52px; }
+
+/* Step 1 of the ladder — deliberately lighter-weight than the flagship card
+   below it (dashed border, no accent bar, tighter padding), so the eye
+   reads it as "the small thing that leads somewhere" rather than a
+   competing option. Anchors the $15,000 Sprint price by showing it right
+   after a $2,000 figure, and makes the Audit-then-Sprint relationship
+   visible instead of separating them into unrelated grid items. */
+.ladder-step {
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--border);
+  background: var(--bg-elevated);
+  padding: 22px 26px;
+}
+.ladder-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 0 0 10px;
+}
+.ladder-step-body {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.ladder-step-title { font-size: 18px; margin: 0 0 6px; letter-spacing: -0.01em; }
+.ladder-step-desc { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin: 0; max-width: 460px; }
+.ladder-step-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.ladder-step-price { font-size: 14.5px; font-weight: 700; color: var(--text); white-space: nowrap; }
+
+.ladder-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 0;
+  color: var(--text-faint);
+  font-size: 12.5px;
+}
+.ladder-connector svg { width: 16px; height: 16px; color: var(--teal-text); flex-shrink: 0; }
+
+.flagship-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  padding: clamp(32px, 5vw, 48px) clamp(28px, 5vw, 44px);
+}
+.flagship-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--gradient);
+}
+.flagship-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0 0 10px;
+}
+.flagship-title {
+  font-size: clamp(24px, 3.4vw, 34px);
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+.flagship-desc {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  max-width: 620px;
+  margin: 0 0 28px;
+}
+.flagship-includes {
+  list-style: none;
+  margin: 0 0 30px;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  max-width: 620px;
+}
+.flagship-includes li {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  padding-left: 22px;
+  position: relative;
+}
+.flagship-includes li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gradient);
+}
+.flagship-includes li strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.flagship-meta {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.flagship-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--teal-text);
+}
+.flagship-subline {
+  margin: 16px 0 0;
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.solutions-divider { margin: 0 0 28px; }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 860px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .card-grid { grid-template-columns: 1fr; } }
+
+.card-grid.card-grid-pair {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 880px;
+  margin: 0 auto;
+  gap: 24px;
+}
+@media (max-width: 640px) { .card-grid.card-grid-pair { grid-template-columns: 1fr; } }
+
+/* Web Systems and Events & Print, stepped up a size from a plain menu card
+   but well short of the flagship's full treatment — a middle rung in the
+   visual hierarchy: Audit (smallest, dashed) < these (medium, thin accent)
+   < Sprint (largest, full accent bar + includes list). */
+.featured-card {
+  position: relative;
+  padding: 38px 32px;
+  overflow: hidden;
+}
+.featured-card::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--gradient);
+}
+.featured-card .card-icon {
+  width: 56px;
+  height: 56px;
+}
+.featured-card .card-icon svg { width: 28px; height: 28px; }
+.featured-card h3 { font-size: 20px; margin-bottom: 10px; }
+.featured-card > p { font-size: 15.5px; }
+.featured-card .card-tiers { margin-top: 20px; padding-top: 18px; gap: 14px; }
+.featured-card .card-tier-name { font-size: 14px; }
+.featured-card .card-tier-desc { font-size: 13px; }
+.featured-card .card-tier-price { font-size: 14px; }
+.featured-card .card-cta { margin-top: 18px; font-size: 13.5px; }
+
+.tilt-card {
+  position: relative;
+  padding: 30px 26px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out, border-color 0.35s var(--ease), background 0.35s var(--ease);
+}
+.tilt-card:hover { border-color: rgba(52, 160, 164, 0.35); background: var(--bg-elevated-strong); }
+.tilt-card::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgba(22, 138, 173, 0.16), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.35s var(--ease);
+  pointer-events: none;
+}
+.tilt-card:hover::before { opacity: 1; }
+
+.card-icon {
+  width: 48px; height: 48px;
+  display: grid; place-items: center;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, rgba(52, 160, 164, 0.14), rgba(233, 78, 128, 0.14));
+  border: 1px solid rgba(52, 160, 164, 0.22);
+  color: var(--teal);
+  margin-bottom: 20px;
+  transition: transform 0.35s var(--ease), border-color 0.35s var(--ease);
+}
+.tilt-card:hover .card-icon {
+  transform: scale(1.06);
+  border-color: rgba(52, 160, 164, 0.4);
+}
+.card-icon svg { width: 24px; height: 24px; }
+
+.tilt-card h3 { font-size: 17px; margin: 0 0 8px; letter-spacing: -0.01em; }
+.tilt-card p { font-size: 14.5px; color: var(--text-muted); line-height: 1.55; margin: 0; }
+.card-price {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--teal-text);
+  margin: 14px 0 0;
+  letter-spacing: 0.01em;
+}
+.card-cta {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.3s var(--ease);
+}
+.card-cta:hover { color: var(--teal); }
+
+/* ---------- Two-tier price breakdown (Web Systems, Events & Print) ---------- */
+/* Same idea as the flagship's Audit/Sprint split, scaled down for a card:
+   each service actually has two ways in (a base offer and a recurring or
+   scoped-up one), and a single "From $X" line was hiding the second half. */
+.card-tiers {
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 12px;
+}
+.card-tier {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.card-tier-name {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.card-tier-desc {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+.card-tier-price {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--teal-text);
+  white-space: nowrap;
+}
+
+.expertise-more {
+  text-align: center;
+  margin: 32px 0 0;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--text-faint);
+}
+
+/* ---------- Clients marquee ---------- */
+.clients { position: relative; z-index: 2; padding: 4px 0 100px; }
+.marquee {
+  overflow: hidden;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 22px 0;
+  mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  gap: 64px;
+  /* 2 repeated copies of the full 30-client list, animated by exactly half
+     the total width (-50%) — seamless loop, and 30 real names are already
+     wide enough on their own to keep the track overflowing the viewport. */
+  animation: marquee 140s linear infinite;
+  font-size: 17px;
+  color: var(--text-faint);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.marquee:hover .marquee-track { animation-play-state: paused; }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ---------- Notify ---------- */
+/* ---------- Founder ---------- */
+/* Placeholder monogram avatar until a real photo is provided — swap the
+   .founder-avatar div for an <img> once one's on hand. */
+.founder { position: relative; z-index: 2; padding: 20px 0 90px; }
+.founder-inner {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+.founder-avatar {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  padding: 3px;
+  background: var(--gradient);
+}
+.founder-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 2px solid var(--bg);
+}
+.founder-copy { flex: 1; min-width: 280px; }
+.founder-copy .section-title { margin-bottom: 14px; }
+.founder-bio {
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: var(--text-muted);
+  max-width: 620px;
+  margin: 0 0 20px;
+}
+.founder-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--teal-text);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 2px;
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.founder-link:hover { color: var(--azure); border-color: var(--azure); }
+.founder-link svg { width: 14px; height: 14px; }
+@media (max-width: 560px) {
+  .founder-inner { flex-direction: column; text-align: center; }
+  .founder-link { justify-content: center; }
+}
+
+.notify { position: relative; z-index: 2; padding: 40px 0 140px; }
+.notify-inner {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  padding: clamp(32px, 6vw, 64px);
+  text-align: center;
+}
+@media (max-width: 768px) {
+  /* .notify-inner's own padding overrides .section-inner's side padding
+     (same element, both classes) — below the width where max-width:1120px
+     stops doing the work, the card's border/background would otherwise
+     touch the screen edges while every other section stays inset. */
+  .notify-inner {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+}
+.notify-copy .section-title { margin-bottom: 12px; }
+.notify-copy p { color: var(--text-muted); max-width: 480px; margin: 0 auto 36px; font-size: 16px; line-height: 1.6; }
+
+.notify-form {
+  display: flex;
+  gap: 10px;
+  max-width: 440px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.notify-form input {
+  flex: 1;
+  min-width: 220px;
+  padding: 14px 18px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+.notify-form input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(52, 160, 164, 0.15); }
+.notify-form textarea {
+  flex: 1 1 100%;
+  min-width: 220px;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+.notify-form textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(52, 160, 164, 0.15); }
+
+.notify-note { margin-top: 20px; font-size: 14px; color: var(--text-faint); }
+
+/* ---------- Footer ---------- */
+.site-footer { position: relative; z-index: 2; padding: 40px 0 28px; border-top: 1px solid var(--border); }
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.footer-socials { display: flex; gap: 10px; }
+.footer-socials a {
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.footer-socials a svg { width: 16px; height: 16px; }
+.footer-socials a:hover { color: var(--teal); border-color: var(--teal); }
+
+.footer-legal {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+  padding: 0 24px;
+}
+.footer-legal-link { color: var(--text-faint); text-decoration: underline; transition: color 0.3s var(--ease); }
+.footer-legal-link:hover { color: var(--teal); }
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+/* ---------- Cursor override (moved to end of file, Round 22) ---------- */
+/* Round 20 added this rule right after the reticle's own CSS, but five later
+   `cursor: pointer` declarations (.theme-toggle, .constellation-hit, .btn,
+   .link-inline, .card-cta) came later in the file and won the cascade,
+   silently undoing the fix. Moving the exact same rule here — after every
+   other cursor declaration in the stylesheet — is what actually fixes it. */
+@media (hover: hover) and (pointer: fine) {
+  body, a, button, .btn, .card-cta, .link-inline, .theme-toggle, .constellation-hit { cursor: none; }
+}
